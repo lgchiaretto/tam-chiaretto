@@ -1,4 +1,7 @@
 pipeline {
+    agent {
+        node {label 'python'}
+    }
     environment {
         APPLICATION_NAME = 'python-nginx'
         GIT_REPO="http://github.com/lgchiaretto/tam-chiaretto.git"
