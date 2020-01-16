@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        node {label 'master'}
+        node {label 'python'}
     }
     environment {
         APPLICATION_NAME = 'python-nginx'
