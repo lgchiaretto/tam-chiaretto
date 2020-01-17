@@ -173,7 +173,7 @@ pipeline {
                                 openshift.selector('svc', '${TEMPLATE_NAME}').delete()
                                 openshift.selector('route', '${TEMPLATE_NAME}').delete()
                             }
-                        openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}").narrow("svc").expose("--port=${PORT}")
+                        openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}").narrow("svc").expose("--port=${PORT}")
                         }
                     }
                 } 
