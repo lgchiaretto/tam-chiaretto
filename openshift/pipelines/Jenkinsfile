@@ -145,7 +145,7 @@ pipeline {
                                 openshift.selector('svc', '${TEMPLATE_NAME}').delete()
                                 openshift.selector('route', '${TEMPLATE_NAME}').delete()
                             }
-                        openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}").narrow("svc").expose("--port=${PORT}")
+                        openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}")
                         }
                     }
                 } 
@@ -173,7 +173,8 @@ pipeline {
                                 openshift.selector('svc', '${TEMPLATE_NAME}').delete()
                                 openshift.selector('route', '${TEMPLATE_NAME}').delete()
                             }
-                        openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}").narrow("svc").expose("--port=${PORT}")
+                        openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}").
+                        openshift.set("replicas", "dc/${TEMPLATE_NAME}", "2")
                         }
                     }
                 } 
