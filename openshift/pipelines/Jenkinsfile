@@ -140,6 +140,11 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject(STAGING_PROJECT) {
+                            if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
+                                openshift.selector('dc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('svc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('route', '${TEMPLATE_NAME}').delete()
+                            }
                         openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}")
                         }
                     }
@@ -163,6 +168,11 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject(PROD_PROJECT) {
+                            if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
+                                openshift.selector('dc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('svc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('route', '${TEMPLATE_NAME}').delete()
+                            }
                         openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}")
                         }
                     }
