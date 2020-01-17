@@ -139,7 +139,7 @@ pipeline {
             steps {
                 script {
                     openshift.withCluster() {
-                        openshift.withProject(PROD_PROJECT) {
+                        openshift.withProject(STAGING_PROJECT) {
                             if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
                                 openshift.selector('dc', '${TEMPLATE_NAME}').delete()
                                 openshift.selector('svc', '${TEMPLATE_NAME}').delete()
