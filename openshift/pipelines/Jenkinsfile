@@ -1,16 +1,15 @@
 pipeline {
     agent {
-        docker {
-            image 'python:3-alpine'
-        }
+        node {label 'python'}
     }
     environment {
         APPLICATION_NAME = 'python-nginx'
         GIT_REPO="http://github.com/lgchiaretto/tam-chiaretto.git"
         GIT_BRANCH="master"
-        STAGE_TAG = "promoteToQA"
-        DEV_PROJECT = "dev"
-        STAGE_PROJECT = "stage"
+        STAGING_TAG = "promoteToStaging"
+        PROD_TAG = "promoteToProduction"
+        STAGING_PROJECT = "staging"
+        PROD_PROJECT = "production"
         TEMPLATE_NAME = "python-nginx"
         ARTIFACT_FOLDER = "target"
         PORT = 8081;
@@ -62,11 +61,11 @@ pipeline {
                 }
             }
         }
-        stage('Create Image Builder') {
+        stage('Create Image Builder Staging') {
             when {
                 expression {
                     openshift.withCluster() {
-                        openshift.withProject(DEV_PROJECT) {
+                        openshift.withProject(STAGING_PROJECT) {
                             return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
                         }
                 }
@@ -75,82 +74,109 @@ pipeline {
         steps {
             script {
                 openshift.withCluster() {
-                    openshift.withProject(DEV_PROJECT) {
+                    openshift.withProject(STAGING_PROJECT) {
                         openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
                         }
                     }
                 }
             }
         }
-        stage('Build Image') {
+        stage('Create Image Builder Production') {
+            when {
+                expression {
+                    openshift.withCluster() {
+                        openshift.withProject(PROD_PROJECT) {
+                            return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
+                        }
+                }
+            }
+        }
+        steps {
+            script {
+                openshift.withCluster() {
+                    openshift.withProject(PROD_PROJECT) {
+                        openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build Image on Staging') {
             steps {
                 script {
                     openshift.withCluster() {
-                        openshift.withProject(env.DEV_PROJECT) {
+                        openshift.withProject(env.STAGING_PROJECT) {
                             openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
                         }
                     }
                 }
             }
         }
-        stage('Deploy to DEV') {
-            when {
-                expression {
-                    openshift.withCluster() {
-                        openshift.withProject(env.DEV_PROJECT) {
-                            return !openshift.selector('dc', "${TEMPLATE_NAME}").exists()
-                        }
-                    }
-                }
-            }
+        stage('Build Image on Production') {
             steps {
                 script {
                     openshift.withCluster() {
-                        openshift.withProject(env.DEV_PROJECT) {
-                            def app = openshift.newApp("${TEMPLATE_NAME}:latest")
-                            app.narrow("svc").expose("--port=${PORT}");
-                            def dc = openshift.selector("dc", "${TEMPLATE_NAME}")
-                            while (dc.object().spec.replicas != dc.object().status.availableReplicas) {
-                                sleep 10
-                            }
+                        openshift.withProject(env.PROD_PROJECT) {
+                            openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
                         }
                     }
                 }
             }
         }
-        stage('Promote to STAGE?') {
+        stage('Promote to STAGING?') {
             steps {
                 timeout(time:15, unit:'MINUTES') {
-                    input message: "Promote to STAGE?", ok: "Promote"
+                    input message: "Promote to STAGING?", ok: "Promote"
                 }
                 script {
                     openshift.withCluster() {
-                        openshift.tag("${DEV_PROJECT}/${TEMPLATE_NAME}:latest", "${STAGE_PROJECT}/${TEMPLATE_NAME}:${STAGE_TAG}")
+                        openshift.tag("${STAGING_PROJECT}/${TEMPLATE_NAME}:latest", "${STAGING_PROJECT}/${TEMPLATE_NAME}:${STAGING_TAG}")
                     }
                 }
             }
         }
-        stage('Rollout to STAGE') {
+        stage('Rollout to STAGING') {
             steps {
                 script {
                     openshift.withCluster() {
-                        openshift.withProject(STAGE_PROJECT) {
+                        openshift.withProject(STAGING_PROJECT) {
                             if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
                                 openshift.selector('dc', '${TEMPLATE_NAME}').delete()
                                 openshift.selector('svc', '${TEMPLATE_NAME}').delete()
                                 openshift.selector('route', '${TEMPLATE_NAME}').delete()
                             }
-                        openshift.newApp("${TEMPLATE_NAME}:${STAGE_TAG}").narrow("svc").expose("--port=${PORT}")
+                        openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}").narrow("svc").expose("--port=${PORT}")
                         }
                     }
                 } 
             }
         }
-        stage('Scale in STAGE') {
+        stage('Promote to PRODUCTION?') {
+            steps {
+                timeout(time:15, unit:'MINUTES') {
+                    input message: "Promote to PRODUCTION?", ok: "Promote"
+                }
+                script {
+                    openshift.withCluster() {
+                        openshift.tag("${PROD_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${PROD_TAG}")
+                    }
+                }
+            }
+        }
+        stage('Rollout to PRODUCTION') {
             steps {
                 script {
-                    openshiftScale(namespace: "${STAGE_PROJECT}", deploymentConfig: "${TEMPLATE_NAME}", replicaCount: '3')
-                }
+                    openshift.withCluster() {
+                        openshift.withProject(PROD_PROJECT) {
+                            if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
+                                openshift.selector('dc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('svc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('route', '${TEMPLATE_NAME}').delete()
+                            }
+                        openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}").narrow("svc").expose("--port=${PORT}")
+                        }
+                    }
+                } 
             }
         }
     }
