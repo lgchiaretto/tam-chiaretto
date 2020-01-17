@@ -140,7 +140,7 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject(STAGING_PROJECT) {
-                            openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}")
+                        openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}")
                         }
                     }
                 } 
@@ -163,7 +163,7 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject(PROD_PROJECT) {
-                            openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}").
+                        openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}")
                         }
                     }
                 } 
