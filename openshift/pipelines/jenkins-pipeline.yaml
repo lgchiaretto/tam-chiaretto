@@ -2,8 +2,8 @@ apiVersion: v1
 kind: BuildConfig
 metadata:
     labels:
-        app: python-nginx-pipeline
-    name: python-nginx-pipeline
+        app: chiaretto-tam-pipeline
+    name: chiaretto-tam-pipeline
 spec:
     source:
         git:
