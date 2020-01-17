@@ -9,7 +9,7 @@ pipeline {
         STAGING_TAG = "promoteToStaging"
         STAGING_PROJECT = "staging"
         PROD_PROJECT = "production"
-        TEMPLATE_NAME = "tam-chiaretto-python"
+        TEMPLATE_NAME = "python-nginx"
         ARTIFACT_FOLDER = "target"
         PORT = 8081;
     }
