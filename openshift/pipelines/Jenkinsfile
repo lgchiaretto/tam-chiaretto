@@ -7,6 +7,7 @@ pipeline {
         GIT_REPO="http://github.com/lgchiaretto/tam-chiaretto.git"
         GIT_BRANCH="master"
         STAGING_TAG = "promoteToStaging"
+        PROD_TAG = "promoteToProduction"
         STAGING_PROJECT = "staging"
         PROD_PROJECT = "production"
         TEMPLATE_NAME = "python-nginx"
@@ -126,7 +127,7 @@ pipeline {
                 }
                 script {
                     openshift.withCluster() {
-                        openshift.tag("${PROD_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:latest")
+                        openshift.tag("${PROD_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${PROD_TAG}")
                     }
                 }
             }
