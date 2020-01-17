@@ -61,7 +61,7 @@ pipeline {
                 }
             }
         }
-        stage('Create Image Builder') {
+        stage('Create Image Builder Staging') {
             when {
                 expression {
                     openshift.withCluster() {
@@ -75,6 +75,26 @@ pipeline {
             script {
                 openshift.withCluster() {
                     openshift.withProject(STAGING_PROJECT) {
+                        openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+                        }
+                    }
+                }
+            }
+        }
+        stage('Create Image Builder Production') {
+            when {
+                expression {
+                    openshift.withCluster() {
+                        openshift.withProject(PROD_PROJECT) {
+                            return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
+                        }
+                }
+            }
+        }
+        steps {
+            script {
+                openshift.withCluster() {
+                    openshift.withProject(PROD_PROJECT) {
                         openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
                         }
                     }
