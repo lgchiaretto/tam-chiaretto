@@ -81,11 +81,22 @@ pipeline {
                 }
             }
         }
-        stage('Build Image') {
+        stage('Build Image on Staging') {
             steps {
                 script {
                     openshift.withCluster() {
                         openshift.withProject(env.STAGING_PROJECT) {
+                            openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build Image on Production') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject(env.PROD_PROJECT) {
                             openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
                         }
                     }
@@ -99,7 +110,7 @@ pipeline {
                 }
                 script {
                     openshift.withCluster() {
-                        openshift.tag("${STAGING_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${STAGING_TAG}")
+                        openshift.tag("${STAGING_PROJECT}/${TEMPLATE_NAME}:latest", "${STAGING_PROJECT}/${TEMPLATE_NAME}:${STAGING_TAG}")
                     }
                 }
             }
@@ -127,7 +138,7 @@ pipeline {
                 }
                 script {
                     openshift.withCluster() {
-                        openshift.tag("${STAGING_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${PROD_TAG}")
+                        openshift.tag("${PROD_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${PROD_TAG}")
                     }
                 }
             }
