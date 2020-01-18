@@ -112,17 +112,6 @@ pipeline {
                 }
             }
         }
-        stage('Build Image on Production') {
-            steps {
-                script {
-                    openshift.withCluster() {
-                        openshift.withProject(env.PROD_PROJECT) {
-                            openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
-                        }
-                    }
-                }
-            }
-        }
         stage('Promote to STAGING?') {
             steps {
                 script {
@@ -147,11 +136,22 @@ pipeline {
                 } 
             }
         }
+        stage('Build Image on Production') {
+            steps {
+                script {
+                    timeout(time:15, unit:'MINUTES') {
+                        input message: "Promote to PRODUCTION?", ok: "Promote"
+                    }
+                    openshift.withCluster() {
+                        openshift.withProject(env.PROD_PROJECT) {
+                            openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
+                        }
+                    }
+                }
+            }
+        }
         stage('Promote to PRODUCTION?') {
             steps {
-                timeout(time:15, unit:'MINUTES') {
-                    input message: "Promote to PRODUCTION?", ok: "Promote"
-                }
                 script {
                     openshift.withCluster() {
                         openshift.tag("${PROD_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${PROD_TAG}")
