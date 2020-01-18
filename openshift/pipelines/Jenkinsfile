@@ -125,9 +125,6 @@ pipeline {
         }
         stage('Promote to STAGING?') {
             steps {
-                timeout(time:15, unit:'MINUTES') {
-                    input message: "Promote to STAGING?", ok: "Promote"
-                }
                 script {
                     openshift.withCluster() {
                         openshift.tag("${STAGING_PROJECT}/${TEMPLATE_NAME}:latest", "${STAGING_PROJECT}/${TEMPLATE_NAME}:${STAGING_TAG}")
