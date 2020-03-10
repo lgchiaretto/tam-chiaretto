@@ -71,6 +71,26 @@ pipeline {
                 }
             }
         }
+        stage('Create Image Builder Production') {
+            when {
+                expression {
+                    openshift.withCluster() {
+                        openshift.withProject(PROD_PROJECT) {
+                            return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
+                        }
+                }
+            }
+        }
+        steps {
+            script {
+                openshift.withCluster() {
+                    openshift.withProject(PROD_PROJECT) {
+                        openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+                        }
+                    }
+                }
+            }
+        }
         stage('Build Image on Staging') {
             steps {
                 script {
@@ -101,6 +121,44 @@ pipeline {
                                 openshift.selector('svc', '${TEMPLATE_NAME}').delete()
                             }
                         openshift.newApp("${TEMPLATE_NAME}:${STAGING_TAG}")
+                        }
+                    }
+                } 
+            }
+        }
+        stage('Build Image on Production') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject(env.PROD_PROJECT) {
+                            openshift.selector("bc", "$TEMPLATE_NAME").startBuild("--from-archive=${ARTIFACT_FOLDER}/${APPLICATION_NAME}_${BUILD_NUMBER}.tar.gz", "--wait=true")
+                        }
+                    }
+                }
+            }
+        }
+        stage('Promote to PRODUCTION?') {
+            steps {
+                script {
+                    timeout(time:15, unit:'MINUTES') {
+                        input message: "Promote to PRODUCTION?", ok: "Promote"
+                    }
+                    openshift.withCluster() {
+                        openshift.tag("${PROD_PROJECT}/${TEMPLATE_NAME}:latest", "${PROD_PROJECT}/${TEMPLATE_NAME}:${PROD_TAG}")
+                    }
+                }
+            }
+        }
+        stage('Rollout to PRODUCTION') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject(PROD_PROJECT) {
+                            if (openshift.selector('dc', '${TEMPLATE_NAME}').exists()) {
+                                openshift.selector('dc', '${TEMPLATE_NAME}').delete()
+                                openshift.selector('svc', '${TEMPLATE_NAME}').delete()
+                            }
+                        openshift.newApp("${TEMPLATE_NAME}:${PROD_TAG}")
                         }
                     }
                 } 
