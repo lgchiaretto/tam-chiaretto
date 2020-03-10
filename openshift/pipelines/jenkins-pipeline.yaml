@@ -5,6 +5,13 @@ metadata:
         app: chiaretto-tam-pipeline
     name: chiaretto-tam-pipeline
 spec:
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
     source:
         git:
             ref: master
