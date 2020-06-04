@@ -9,7 +9,6 @@ def print_message():
 
 @app.route('/healthcheck', methods=['GET'])
 def print_helthcheck():
-    time.sleep(30)
     return "ok"
 
 if __name__ == '__main__':
