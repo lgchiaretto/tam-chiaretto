@@ -6,5 +6,9 @@ app = Flask(__name__)
 def print_message():
     return "It's me, Mario!!!"
 
+@app.route('/healthcheck', methods=['GET'])
+def print_message():
+    return "ok"
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
