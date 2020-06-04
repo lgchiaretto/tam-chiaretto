@@ -7,7 +7,7 @@ def print_message():
     return "It's me, Mario!!!"
 
 @app.route('/healthcheck', methods=['GET'])
-def print_message():
+def print_helthcheck():
     return "ok"
 
 if __name__ == '__main__':
