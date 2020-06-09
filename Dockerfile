@@ -1,4 +1,4 @@
-FROM nginx:mainline-alpine
+FROM twalter/openshift-nginx
 
 # --- Python Installation ---
 RUN apk add --no-cache python3 && \
