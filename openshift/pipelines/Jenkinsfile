@@ -8,8 +8,8 @@ pipeline {
         GIT_BRANCH="master"
         STAGING_TAG = "promoteToStaging"
         PROD_TAG = "promoteToProduction"
-        STAGING_PROJECT = "staging"
-        PROD_PROJECT = "production"
+        STAGING_PROJECT = "pipeline-staging"
+        PROD_PROJECT = "pipeline-production"
         TEMPLATE_NAME = "python-nginx"
         ARTIFACT_FOLDER = "target"
         PORT = 8081;
