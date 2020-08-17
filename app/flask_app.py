@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def print_message():
-    return "It's me, Mario!!!"
+    return "It's me, Mario!"
 
 @app.route('/healthcheck', methods=['GET'])
 def print_helthcheck():
