@@ -34,11 +34,8 @@ def print_databases():
     databases = cursor.fetchall() ## it returns a list of all databases present
 
     ## printing the list of databases
-    print(databases)
+   return databases
 
-    ## showing one by one database
-    for database in databases:
-        print(database)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
