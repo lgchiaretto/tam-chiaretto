@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import jsonify
 import time
 import socket
 import mysql.connector as mysql
@@ -24,11 +25,13 @@ def print_databases():
         user = "admin",
         passwd = "redhat"
     )
+    alldbs = []
     cursor = db.cursor()
     cursor.execute("SHOW DATABASES")
     databases = cursor.fetchall() ## it returns a list of all databases present
-    return databases
-
+    for database in databases
+        alldbs.append(database)
+    return jsonify(alldbs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
