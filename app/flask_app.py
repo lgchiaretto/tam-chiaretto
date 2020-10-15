@@ -17,7 +17,7 @@ def print_helthcheck():
 def print_pod():
     return socket.gethostname()
 
-@app.route('/databses', methods=['GET'])
+@app.route('/databases', methods=['GET'])
 def print_databases():
     db = mysql.connect(
         host = "mysql-57-rhel7.chiaretto.svc",
