@@ -24,17 +24,10 @@ def print_databases():
         user = "admin",
         passwd = "redhat"
     )
-
     cursor = db.cursor()
-
-    ## executing the statement using 'execute()' method
     cursor.execute("SHOW DATABASES")
-
-    ## 'fetchall()' method fetches all the rows from the last executed statement
     databases = cursor.fetchall() ## it returns a list of all databases present
-
-    ## printing the list of databases
-   return databases
+    return databases
 
 
 if __name__ == '__main__':
