@@ -28,8 +28,8 @@ def print_databases():
     alldbs = []
     cursor = db.cursor()
     cursor.execute("SHOW DATABASES")
-    databases = cursor.fetchall() ## it returns a list of all databases present
-    for database in databases
+    databases = cursor.fetchall()
+    for database in databases:
         alldbs.append(database)
     return jsonify(alldbs)
 
