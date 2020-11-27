@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import jsonify
+from flask import request
 import time
 import socket
 import mysql.connector as mysql
@@ -32,6 +33,17 @@ def print_databases():
     for database in databases:
         alldbs.append(database)
     return jsonify(alldbs)
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
