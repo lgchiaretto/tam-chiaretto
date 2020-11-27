@@ -34,15 +34,9 @@ def print_databases():
         alldbs.append(database)
     return jsonify(alldbs)
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-@app.route('/shutdown', methods=['GET'])
-def shutdown():
-    shutdown_server()
+@app.route('/crash', methods=['GET'])
+def ExitScript():
+    subprocess.Popen("^D")
     return 'Server shutting down...'
 
 if __name__ == '__main__':
