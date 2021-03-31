@@ -23,7 +23,7 @@ def print_pod():
 @app.route('/databases', methods=['GET'])
 def print_databases():
     db = mysql.connect(
-        host = "mysql-57-rhel7.chiaretto.svc",
+        host = "mysql-57-rhel7.tam.svc",
         user = "admin",
         passwd = "redhat"
     )
