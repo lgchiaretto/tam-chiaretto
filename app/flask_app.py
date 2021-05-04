@@ -20,10 +20,27 @@ def print_helthcheck():
 def print_pod():
     return socket.gethostname()
 
+@app.route('/version', methods=['GET'])
+def print_pod():
+    return os.environ.get('APP_VERSION')
+
+@app.route('/secret', methods=['GET'])
+def print_pod():
+    return os.environ.get('APP_SECRET')
+
+@app.route('/help', methods=['GET'])
+def print_pod():
+    return """GET /
+              GET /databases
+              GET /secret
+              GET /version
+              GET /pod
+              GET /healthcheck"""
+
 @app.route('/databases', methods=['GET'])
 def print_databases():
     db = mysql.connect(
-        host = "mysql-57-rhel7.tam.svc",
+        host = "mysql-57-rhel7.chiaretto.svc",
         user = "admin",
         passwd = "redhat"
     )
