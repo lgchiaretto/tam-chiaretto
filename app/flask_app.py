@@ -22,15 +22,15 @@ def print_pod():
     return socket.gethostname()
 
 @app.route('/version', methods=['GET'])
-def print_pod():
+def print_version():
     return os.environ.get('APP_VERSION')
 
 @app.route('/secret', methods=['GET'])
-def print_pod():
+def print_secret():
     return os.environ.get('APP_SECRET')
 
 @app.route('/help', methods=['GET'])
-def print_pod():
+def print_help():
     return """GET /
               GET /databases
               GET /secret
