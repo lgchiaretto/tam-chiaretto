@@ -25,6 +25,10 @@ def print_pod():
 def print_version():
     return os.environ.get('APP_VERSION')
 
+@app.route('/env', methods=['GET'])
+def print_app_env():
+    return os.environ.get('APP_ENV')
+
 @app.route('/secret', methods=['GET'])
 def print_secret():
     return os.environ.get('APP_SECRET')
